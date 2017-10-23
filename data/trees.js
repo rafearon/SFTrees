@@ -8,6 +8,10 @@ var mapHeight = 750;
 
 var mapDashboardHorzPadding = 20;
 
+var selectingPoints = false;
+var pointA = {lat:0, long:0};
+var pointB = {lat:0, long:0};
+
 // Set up projection that the map is using
 var projection = d3.geoMercator()
     .center([-122.433701, 37.767683]) // San Francisco, roughly
@@ -62,8 +66,18 @@ d3.csv('trees.csv', parseInputRow, loadData);
 function loadData(error, treeData){
 	if(error) throw error;
 	drawTreeMap(treeData);
-    drawDashboard();
-	console.log(treeData);
+    console.log(treeData);
+    
+    // Draw dashboard controls
+    var selectPointsBtn = drawSelectPointsBtn(drawDashboard());
+    
+    d3.select('#selectBtn').on("click", function(d){
+        // Button clicked to change select points
+        console.log(d);
+        d3.select('#selectBtn').attr("fill", "orange");
+        resetSelectedPoints();
+    })
+	
 }
 
 function drawTreeMap(treeData) {
@@ -77,58 +91,39 @@ function drawTreeMap(treeData) {
 	.style('fill', 'blue');
 	let unselectedCircles = updatedCircles.exit();
 	updatedCircles.exit().remove(); 
+    
+    d3.select("#sf-map").attr("onclick", "clicked(evt)");
 }
 
 function drawDashboard(){
     /*
     StackOverflow post that helped find how to append text to SVG element
     https://stackoverflow.com/questions/20644415/d3-appending-text-to-a-svg-rectangle
+    */
     
-    
-    var elems = dashboardElem.selectAll("g")
-        .data(dashboardData)
-        .enter().append("g");
-//        .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-    elems.append("rect")
-        .attr("width", 25)
-        .attr("height", 15)
-        .attr("fill","orange");
-*/
-    var elems = dashboardSvg.selectAll('g')
+    return elems = dashboardSvg.selectAll('g')
         .data(dashboardData)
         .enter()
         .append('g');
-    
+}
+
+function drawSelectPointsBtn(elems){
+    var buttonHeight = 25;
+
     elems.append('rect')
-        .attr('width', 50)
-        .attr('height', 25)
-        .attr('fill', 'grey');
+        .attr('id', 'selectBtn')
+        .attr('width', 120)
+        .attr('height', buttonHeight)
+        .attr('fill', 'steelblue');
         
-    elems.append('text')
-        .text("test")
-        .attr('x', 5)
-        .attr('y', 10)
+    return elems.append('text')
+        .text("Select Points")
+        .attr('x', 10)
+        .attr('y', buttonHeight/2+5)
         .attr('width', 100)
         .attr('height', 100)
-        .attr('fill', 'black');
-    
-
-    
-/*    elems.append("text")
-        .attr("x", function(d) { return x(d) - 3; })
-        .attr("y", barHeight / 2)
-        .attr("dy", ".35em")
-        .text(function(d) { return d; });
-    
-    
-    
-    let elems = dashboardElem.selectAll('rect')
-        .data(dashboardData)
-        .enter()
-        .append('rect')
-        .fillText("meep");
-  */      
+        .attr('font-family', "Arial")
+        .attr('fill', 'white');
 }
 
 function parseInputRow (d) {
@@ -144,4 +139,60 @@ function parseInputRow (d) {
           longitude: +d.Longitude,
           geoCoord: [+d.Latitude, +d.Longitude]
         };
-      }
+      };
+
+/* Finding coordinates where clicked, helped by StackOverflow 
+https://stackoverflow.com/questions/29261304/how-to-get-the-click-coordinates-relative-to-svg-element-holding-the-onclick-lis*/
+function clicked(evt){
+    if(pointA.lat==0){
+        var e = evt.target;
+        var dim = e.getBoundingClientRect();
+        var x = evt.clientX - dim.left;
+        var y = evt.clientY - dim.top;
+
+        plot.append("circle")
+            .attr("id", "pointA")
+            .attr("fill", "red")
+            .attr('r', 3)
+            .attr('cx', x) 
+            .attr('cy', y);
+        var coords = projection.invert([x, y]);
+        pointA.lat = coords[1];
+        pointA.lon = coords[0];
+        console.log("pointA lat: "+pointA.lat+" lon:"+pointA.lon);
+        
+    } else if(pointB.lat == 0){
+        var e = evt.target;
+        var dim = e.getBoundingClientRect();
+        var x = evt.clientX - dim.left;
+        var y = evt.clientY - dim.top;
+
+        plot.append("circle")
+            .attr("id", "pointB")
+            .attr("fill", "red")
+            .attr('r', 3)
+            .attr('cx', x) 
+            .attr('cy', y);
+        
+        var coords = projection.invert([x, y]);
+        pointB.lat = coords[1];
+        pointB.lon = coords[0];
+        console.log("pointB lat: "+pointB.lat+" lon:"+pointB.lon);
+        
+        // turn the button back to unselected because points are chosen
+        saveSelectedPoints();
+    } else {
+        
+    }
+}  
+
+function resetSelectedPoints(){
+    pointA = {lat:0, lon:0};
+    pointB = {lat:0, lon:0};
+    d3.selectAll('#pointA').remove();
+    d3.selectAll('#pointB').remove();
+}
+
+function saveSelectedPoints(){
+    d3.select('#selectBtn').attr("fill", "steelblue");
+}
