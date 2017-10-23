@@ -71,9 +71,8 @@ function loadData(error, treeData){
     // Draw dashboard controls
     var selectPointsBtn = drawSelectPointsBtn(drawDashboard());
     
-    d3.select('#selectBtn').on("click", function(d){
+    d3.selectAll('#selectBtn').on("click", function(d){
         // Button clicked to change select points
-        console.log(d);
         d3.select('#selectBtn').attr("fill", "orange");
         resetSelectedPoints();
     })
@@ -114,10 +113,11 @@ function drawSelectPointsBtn(elems){
         .attr('id', 'selectBtn')
         .attr('width', 120)
         .attr('height', buttonHeight)
-        .attr('fill', 'steelblue');
+        .attr('fill', 'orange');
         
     return elems.append('text')
         .text("Select Points")
+        .attr('id', 'selectBtn')
         .attr('x', 10)
         .attr('y', buttonHeight/2+5)
         .attr('width', 100)
