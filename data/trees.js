@@ -153,6 +153,8 @@ function parseInputRow (d) {
 
 /* Finding coordinates where clicked, helped by StackOverflow 
 https://stackoverflow.com/questions/29261304/how-to-get-the-click-coordinates-relative-to-svg-element-holding-the-onclick-lis*/
+
+
 function clicked(evt){
     if(pointA.lat==0){
         var e = evt.target;
@@ -219,6 +221,26 @@ function drawSpeciesMenu(treeData) {
 		menu.append('option').attr("value", name).text(name);
 	}
 
+	menu.on('change', function() {
+		let currSelection = d3.select("select").property('value');
+		let currData;
+		if (currSelection === "All") {
+			currData = treeData;
+		} else {
+			currData = treeData.filter(d => d.speciesNames[1] === currSelection);
+		}
+		let circles = plot.selectAll('circle');
+		let updatedCircles = circles.data(currData, d=> d.id);
+		let enterSelection = updatedCircles.enter();
+		let newCircles = enterSelection.append('circle')
+			.attr('r', 2)
+			.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
+			.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
+			.style('fill', 'blue');
+		let unselectedCircles = updatedCircles.exit();
+		updatedCircles.exit().remove(); 
+	});
+
 	//Select list elements
 	//data = species
 	// use d3, select circles where species = drop down
@@ -226,7 +248,7 @@ function drawSpeciesMenu(treeData) {
 }
 
 //Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3
-
+// https://stackoverflow.com/questions/24193593/d3-how-to-change-dataset-based-on-drop-down-box-selection
 
 function parseSpeciesLabel(name) {
 	var splitNames = name.split("::");
