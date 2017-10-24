@@ -211,10 +211,10 @@ function saveSelectedPoints(){
 function drawSpeciesMenu(treeData) {
     console.log('Added menu');
 
-	menu = d3.select('body').append('select');
+	menu = d3.select('body').append('select').attr("name", "SpeciesMenu");
 	names = Array.from(speciesCommonNames);
-	names.append("All");
-	names.sort(function(a,b){return (a-b);});
+	names.sort();
+	names.unshift("All")
 	for (name of names) {
 		menu.append('option').attr("value", name).text(name);
 	}
@@ -225,16 +225,18 @@ function drawSpeciesMenu(treeData) {
 	//set attribute = some color
 }
 
+//Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3
+
 
 function parseSpeciesLabel(name) {
 	var splitNames = name.split("::");
 	latinName = splitNames[0];
 	commonName = splitNames[1];
 	//console.log(splitNames);
-	if (latinName == "") {
+	if (latinName === "") {
 		latinName = "Unknown";
 	}
-	if (commonName == "") {
+	if (commonName === "") {
 		commonName = "Unknown";
 	}
 	return [latinName, commonName];
