@@ -2,6 +2,8 @@
 // Assumes you've included D3 version 4 somewhere above:
 
 
+var speciesCommonNames = new Set();
+
 // Set up size
 var mapWidth = 750;
 var mapHeight = 750;
@@ -66,8 +68,9 @@ d3.csv('trees.csv', parseInputRow, loadData);
 function loadData(error, treeData){
 	if(error) throw error;
 	drawTreeMap(treeData);
-    console.log(treeData);
-    
+    drawSpeciesMenu(treeData);
+
+    //console.log(treeData);
     // Draw dashboard controls
     var selectPointsBtn = drawSelectPointsBtn(drawDashboard());
     
@@ -77,6 +80,8 @@ function loadData(error, treeData){
         resetSelectedPoints();
     })
 	
+
+	//Set up dropdown menu for species selection
 }
 
 function drawTreeMap(treeData) {
@@ -128,6 +133,10 @@ function drawSelectPointsBtn(elems){
 
 function parseInputRow (d) {
         //console.log(d)
+
+        sn = parseSpeciesLabel(d.qSpecies);
+        speciesCommonNames.add(sn[1]);
+
         return {
           id: +d.TreeID,
           species: d.qSpecies,
@@ -137,7 +146,8 @@ function parseInputRow (d) {
           plotSize: d.PlotSize,
 	      latitude: +d.Latitude,
           longitude: +d.Longitude,
-          geoCoord: [+d.Latitude, +d.Longitude]
+          geoCoord: [+d.Latitude, +d.Longitude], 
+          speciesNames: sn
         };
       };
 
@@ -195,4 +205,38 @@ function resetSelectedPoints(){
 
 function saveSelectedPoints(){
     d3.select('#selectBtn').attr("fill", "steelblue");
+}
+
+
+function drawSpeciesMenu(treeData) {
+    console.log('Added menu');
+
+	menu = d3.select('body').append('select');
+	names = Array.from(speciesCommonNames);
+	names.append("All");
+	names.sort(function(a,b){return (a-b);});
+	for (name of names) {
+		menu.append('option').attr("value", name).text(name);
+	}
+
+	//Select list elements
+	//data = species
+	// use d3, select circles where species = drop down
+	//set attribute = some color
+}
+
+
+function parseSpeciesLabel(name) {
+	var splitNames = name.split("::");
+	latinName = splitNames[0];
+	commonName = splitNames[1];
+	//console.log(splitNames);
+	if (latinName == "") {
+		latinName = "Unknown";
+	}
+	if (commonName == "") {
+		commonName = "Unknown";
+	}
+	return [latinName, commonName];
+
 }
