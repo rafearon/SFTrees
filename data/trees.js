@@ -2,17 +2,20 @@
 // Assumes you've included D3 version 4 somewhere above:
 
 
-var speciesCommonNames = new Set();
-
 // Set up size
 var mapWidth = 750;
 var mapHeight = 750;
 
 var mapDashboardHorzPadding = 20;
 
-var selectingPoints = false;
 var pointA = {lat:0, long:0};
 var pointB = {lat:0, long:0};
+
+// Default radius values is 20
+var radiusA = 20;
+var radiusB = 20;
+
+
 
 // Set up projection that the map is using
 var projection = d3.geoMercator()
@@ -28,12 +31,12 @@ var projection = d3.geoMercator()
 
 
 // Add an SVG element to the DOM
-var svg = d3.select('body').append('svg')
+var svg = d3.select('#mapDiv').append('svg')
   .attr('width', mapWidth)
   .attr('height', mapHeight)
   .attr('id', 'sf-map');
 
-var dashboardSvg = d3.select('body').append('svg')
+var dashboardSvg = d3.select('#dashboardContainer').append('svg')
   .attr('width', 200 + mapDashboardHorzPadding)
   .attr('height', mapHeight)
   .attr('x', mapWidth + 10)
@@ -52,12 +55,6 @@ svg.append('image')
 
 // Set up Dashboard elements
 var dashboardData = [{name:"Select Points", selected:false}]
-/*dashboardSvg.append('rect')
-  .attr('width', 50)
-  .attr('height', 25)
-  .attr('fill', 'grey');
-*/
-
 
 d3.csv('trees.csv', parseInputRow, loadData);
 
@@ -68,9 +65,8 @@ d3.csv('trees.csv', parseInputRow, loadData);
 function loadData(error, treeData){
 	if(error) throw error;
 	drawTreeMap(treeData);
-    drawSpeciesMenu(treeData);
-
-    //console.log(treeData);
+    console.log(treeData);
+    
     // Draw dashboard controls
     var selectPointsBtn = drawSelectPointsBtn(drawDashboard());
     
@@ -79,9 +75,9 @@ function loadData(error, treeData){
         d3.select('#selectBtn').attr("fill", "orange");
         resetSelectedPoints();
     })
-	
-
-	//Set up dropdown menu for species selection
+    
+    addInputCallbacks();
+    
 }
 
 function drawTreeMap(treeData) {
@@ -133,10 +129,6 @@ function drawSelectPointsBtn(elems){
 
 function parseInputRow (d) {
         //console.log(d)
-
-        sn = parseSpeciesLabel(d.qSpecies);
-        speciesCommonNames.add(sn[1]);
-
         return {
           id: +d.TreeID,
           species: d.qSpecies,
@@ -146,15 +138,28 @@ function parseInputRow (d) {
           plotSize: d.PlotSize,
 	      latitude: +d.Latitude,
           longitude: +d.Longitude,
-          geoCoord: [+d.Latitude, +d.Longitude], 
-          speciesNames: sn
+          geoCoord: [+d.Latitude, +d.Longitude]
         };
       };
 
+function addInputCallbacks(){
+    /*
+    Page that helped figure out how to get input values from
+        input tag: 
+        http://bl.ocks.org/d3noob/10632804
+    */
+    d3.select("#aRadius")
+        .on('input', function() {
+            onRadiusAChange(this.value);                
+        });
+    d3.select("#bRadius")
+        .on('input', function() {
+            onRadiusBChange(this.value);
+        });
+}
+
 /* Finding coordinates where clicked, helped by StackOverflow 
 https://stackoverflow.com/questions/29261304/how-to-get-the-click-coordinates-relative-to-svg-element-holding-the-onclick-lis*/
-
-
 function clicked(evt){
     if(pointA.lat==0){
         var e = evt.target;
@@ -171,8 +176,7 @@ function clicked(evt){
         var coords = projection.invert([x, y]);
         pointA.lat = coords[1];
         pointA.lon = coords[0];
-        console.log("pointA lat: "+pointA.lat+" lon:"+pointA.lon);
-        
+
     } else if(pointB.lat == 0){
         var e = evt.target;
         var dim = e.getBoundingClientRect();
@@ -189,7 +193,6 @@ function clicked(evt){
         var coords = projection.invert([x, y]);
         pointB.lat = coords[1];
         pointB.lon = coords[0];
-        console.log("pointB lat: "+pointB.lat+" lon:"+pointB.lon);
         
         // turn the button back to unselected because points are chosen
         saveSelectedPoints();
@@ -197,6 +200,36 @@ function clicked(evt){
         
     }
 }  
+
+/* Called when input changed for Radius A */
+function onRadiusAChange(newRadius){
+  radiusA = newRadius;
+    if(pointA.lat !== 0){
+        // we have an actual point
+        var coords = projection([pointA.lon, pointA.lat]);
+        
+        var selectedRadi = d3.select('#radCircleA');
+        if (selectedRadi.empty()){
+            // Need to create new circle
+            plot.append("circle")
+                .attr("id", "radCircleA")
+                .attr("stroke", "green")
+                .attr("fill-opacity", 0.4)
+                .attr("fill", "green")
+                .attr('r', newRadius)
+                .attr('cx', coords[0]) 
+                .attr('cy', coords[1])
+        } else{
+            selectedRadi.attr('r', newRadius);
+        }
+    }
+}
+
+/* Called when input changed for Radius B */
+function onRadiusBChange(newRadius){
+     radiusB = newRadius;
+    console.log("radius B: " + radiusB);
+}
 
 function resetSelectedPoints(){
     pointA = {lat:0, lon:0};
@@ -207,60 +240,6 @@ function resetSelectedPoints(){
 
 function saveSelectedPoints(){
     d3.select('#selectBtn').attr("fill", "steelblue");
-}
-
-
-function drawSpeciesMenu(treeData) {
-    console.log('Added menu');
-
-	menu = d3.select('body').append('select').attr("name", "SpeciesMenu");
-	names = Array.from(speciesCommonNames);
-	names.sort();
-	names.unshift("All")
-	for (name of names) {
-		menu.append('option').attr("value", name).text(name);
-	}
-
-	menu.on('change', function() {
-		let currSelection = d3.select("select").property('value');
-		let currData;
-		if (currSelection === "All") {
-			currData = treeData;
-		} else {
-			currData = treeData.filter(d => d.speciesNames[1] === currSelection);
-		}
-		let circles = plot.selectAll('circle');
-		let updatedCircles = circles.data(currData, d=> d.id);
-		let enterSelection = updatedCircles.enter();
-		let newCircles = enterSelection.append('circle')
-			.attr('r', 2)
-			.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
-			.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
-			.style('fill', 'blue');
-		let unselectedCircles = updatedCircles.exit();
-		updatedCircles.exit().remove(); 
-	});
-
-	//Select list elements
-	//data = species
-	// use d3, select circles where species = drop down
-	//set attribute = some color
-}
-
-//Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3
-// https://stackoverflow.com/questions/24193593/d3-how-to-change-dataset-based-on-drop-down-box-selection
-
-function parseSpeciesLabel(name) {
-	var splitNames = name.split("::");
-	latinName = splitNames[0];
-	commonName = splitNames[1];
-	//console.log(splitNames);
-	if (latinName === "") {
-		latinName = "Unknown";
-	}
-	if (commonName === "") {
-		commonName = "Unknown";
-	}
-	return [latinName, commonName];
-
+    onRadiusAChange(document.getElementById('aRadius').value);
+    onRadiusBChange(document.getElementById('bRadius').value);
 }
