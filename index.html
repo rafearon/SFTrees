@@ -5,10 +5,28 @@
   <meta charset="utf-8">
   <title>Trees in San Francisco</title>
   <link rel="stylesheet" href="styles/styles.css?v=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
 <body>
   <script src="data/d3.v4.min.js"></script>
+
+    <div class="row">
+        <div class="col-md-9" id="mapDiv"></div>
+        <div class="col-md-3" id="dashboardContainer">
+            <div>
+                <span>Point A Radius: </span>
+                <input id="aRadius" type="range" min="1" max="200">
+            </div>
+            <div>
+                <span>Point B Radius: </span>
+                <input id="bRadius" type="range" min="1" max="200">
+            </div>
+        </div>
+    </div>
+    
   <script src="data/trees.js"></script>
-</body>
+    </body>
 </html>
