@@ -8,11 +8,18 @@ var speciesCommonNames = new Set();
 var mapWidth = 750;
 var mapHeight = 750;
 
+var mapVertPadding = 100;
+
 var mapDashboardHorzPadding = 20;
 
 var selectingPoints = false;
 var pointA = {lat:0, long:0};
 var pointB = {lat:0, long:0};
+
+
+var MAP_OFFSET = 0;
+
+
 
 // Set up projection that the map is using
 var projection = d3.geoMercator()
@@ -46,7 +53,7 @@ let plot = d3.select('#sf-map').append('g');
 // Add SVG map at correct size, assuming map is saved in a subdirectory called `data`
 svg.append('image')
   .attr('width', mapWidth)
-  .attr('height', mapHeight- 100)
+  .attr('height', mapHeight)
   .attr('xlink:href', 'data/sf-map.svg');
 
 
