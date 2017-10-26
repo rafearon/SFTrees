@@ -22,6 +22,13 @@ var radiusB = 20;
 
 
 
+function isTreeInCircle(selectionCircle, tree) {
+	
+}
+
+
+
+
 // Set up projection that the map is using
 var projection = d3.geoMercator()
     .center([-122.433701, 37.767683]) // San Francisco, roughly
@@ -90,7 +97,7 @@ function drawTreeMap(treeData) {
 	let updatedCircles = circles.data(treeData, d=> d.id);
 	let enterSelection = updatedCircles.enter();
 	let newCircles = enterSelection.append('circle')
-	.attr('r', 2)
+	.attr('r', 1)
 	.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
 	.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
 	.style('fill', 'blue');
