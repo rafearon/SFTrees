@@ -15,6 +15,14 @@ var pointB = {lat:0, long:0};
 var radiusA = 20;
 var radiusB = 20;
 
+var speciesCommonNames = new Set();
+var selectingPoints = false; 
+
+function isTreeInCircle(selectionCircle, tree) {
+	
+}
+
+
 
 
 // Set up projection that the map is using
@@ -75,7 +83,7 @@ function loadData(error, treeData){
         d3.select('#selectBtn').attr("fill", "orange");
         resetSelectedPoints();
     })
-    
+    drawSpeciesMenu(treeData);
     addInputCallbacks();
     
 }
@@ -85,7 +93,7 @@ function drawTreeMap(treeData) {
 	let updatedCircles = circles.data(treeData, d=> d.id);
 	let enterSelection = updatedCircles.enter();
 	let newCircles = enterSelection.append('circle')
-	.attr('r', 2)
+	.attr('r', 1)
 	.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
 	.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
 	.style('fill', 'blue');
@@ -129,6 +137,8 @@ function drawSelectPointsBtn(elems){
 
 function parseInputRow (d) {
         //console.log(d)
+        sn = parseSpeciesLabel(d.qSpecies); 
+        speciesCommonNames.add(sn[1]); 
         return {
           id: +d.TreeID,
           species: d.qSpecies,
@@ -138,7 +148,8 @@ function parseInputRow (d) {
           plotSize: d.PlotSize,
 	      latitude: +d.Latitude,
           longitude: +d.Longitude,
-          geoCoord: [+d.Latitude, +d.Longitude]
+          geoCoord: [+d.Latitude, +d.Longitude],
+          speciesNames: sn 
         };
       };
 
@@ -262,4 +273,58 @@ function saveSelectedPoints(){
     d3.select('#selectBtn').attr("fill", "steelblue");
     onRadiusAChange(document.getElementById('aRadius').value);
     onRadiusBChange(document.getElementById('bRadius').value);
+}
+
+
+function drawSpeciesMenu(treeData) { 
+	menu = d3.select('body').append('select').attr("name", "SpeciesMenu"); 
+	names = Array.from(speciesCommonNames); 
+	names.sort(); 
+	names.unshift("All") 
+	for (name of names) { 
+		menu.append('option').attr("value", name).text(name); 
+	} 
+	menu.on('change', function() { 
+		let currSelection = d3.select("select").property('value'); 
+		let currData; 
+		if (currSelection === "All") { 
+			currData = treeData; 
+		} else { 
+			currData = treeData.filter(d => d.speciesNames[1] === currSelection); 
+		} 
+		let circles = plot.selectAll('circle'); 
+		let updatedCircles = circles.data(currData, d=> d.id); 
+		let enterSelection = updatedCircles.enter(); 
+		let newCircles = enterSelection.append('circle') 
+			.attr('r', 2) 
+			.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];})  
+			.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];}) 
+			.style('fill', 'blue'); 
+		let unselectedCircles = updatedCircles.exit(); 
+		updatedCircles.exit().remove();  
+	}); 
+ 
+}
+
+
+
+
+//Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3 
+
+
+// https://stackoverflow.com/questions/24193593/d3-how-to-change-dataset-based-on-drop-down-box-selection 
+
+
+ function parseSpeciesLabel(name) { 
+	var splitNames = name.split("::"); 
+	latinName = splitNames[0]; 
+	commonName = splitNames[1]; 
+	//console.log(splitNames); 
+	if (latinName === "") { 
+		latinName = "Unknown"; 
+	} 
+	if (commonName === "") { 
+		commonName = "Unknown"; 
+	} 
+	return [latinName, commonName]; 
 }
