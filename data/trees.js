@@ -23,6 +23,10 @@ var radiusB = 20;
 var speciesCommonNames = new Set();
 var selectingPoints = false; 
 
+var TREE_DOT_RADIUS = 2
+
+
+
 function isTreeInCircle(selectionCircle, tree) {
 	
 }
@@ -98,7 +102,7 @@ function drawTreeMap(treeData) {
 	let updatedCircles = circles.data(treeData, d=> d.id);
 	let enterSelection = updatedCircles.enter();
 	let newCircles = enterSelection.append('circle')
-	.attr('r', 1)
+	.attr('r', TREE_DOT_RADIUS)
 	.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
 	.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
 	.style('fill', 'blue');
@@ -281,7 +285,7 @@ function drawSpeciesMenu(treeData) {
 		let updatedCircles = circles.data(currData, d=> d.id); 
 		let enterSelection = updatedCircles.enter(); 
 		let newCircles = enterSelection.append('circle') 
-			.attr('r', 2) 
+			.attr('r', TREE_DOT_RADIUS) 
 			.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];})  
 			.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];}) 
 			.style('fill', 'blue'); 
