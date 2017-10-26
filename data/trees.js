@@ -6,15 +6,10 @@
 var mapWidth = 750;
 var mapHeight = 750;
 
-var mapVertPadding = 100;
-
 var mapDashboardHorzPadding = 20;
 
 var pointA = {lat:0, long:0};
 var pointB = {lat:0, long:0};
-
-
-var MAP_OFFSET = 0;
 
 // Default radius values is 20
 var radiusA = 20;
@@ -54,7 +49,7 @@ let plot = d3.select('#sf-map').append('g');
 // Add SVG map at correct size, assuming map is saved in a subdirectory called `data`
 svg.append('image')
   .attr('width', mapWidth)
-  .attr('height', mapHeight)
+  .attr('height', mapHeight- 100)
   .attr('xlink:href', 'data/sf-map.svg');
 
 
@@ -233,7 +228,25 @@ function onRadiusAChange(newRadius){
 /* Called when input changed for Radius B */
 function onRadiusBChange(newRadius){
      radiusB = newRadius;
-    console.log("radius B: " + radiusB);
+    if(pointB.lat !== 0){
+        // we have an actual point
+        var coords = projection([pointB.lon, pointB.lat]);
+        
+        var selectedRadi = d3.select('#radCircleB');
+        if (selectedRadi.empty()){
+            // Need to create new circle
+            plot.append("circle")
+                .attr("id", "radCircleB")
+                .attr("stroke", "green")
+                .attr("fill-opacity", 0.4)
+                .attr("fill", "green")
+                .attr('r', newRadius)
+                .attr('cx', coords[0]) 
+                .attr('cy', coords[1])
+        } else{
+            selectedRadi.attr('r', newRadius);
+        }
+    }
 }
 
 function resetSelectedPoints(){
@@ -241,6 +254,8 @@ function resetSelectedPoints(){
     pointB = {lat:0, lon:0};
     d3.selectAll('#pointA').remove();
     d3.selectAll('#pointB').remove();
+    d3.select('#radCircleA').remove();
+    d3.select('#radCircleB').remove();
 }
 
 function saveSelectedPoints(){
