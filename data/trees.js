@@ -277,7 +277,7 @@ function saveSelectedPoints(){
 
 
 function drawSpeciesMenu(treeData) { 
-	menu = d3.select('body').append('select').attr("name", "SpeciesMenu"); 
+	menu = d3.select('#mapDiv').append('select').attr("name", "SpeciesMenu"); 
 	names = Array.from(speciesCommonNames); 
 	names.sort(); 
 	names.unshift("All") 
