@@ -61,7 +61,7 @@ let plot = d3.select('#sf-map').append('g');
 // Add SVG map at correct size, assuming map is saved in a subdirectory called `data`
 svg.append('image')
   .attr('width', mapWidth)
-  .attr('height', mapHeight- 100)
+  .attr('height', mapHeight)
   .attr('xlink:href', 'data/sf-map.svg');
 
 
@@ -93,14 +93,15 @@ function loadData(error, treeData){
 }
 
 function drawTreeMap(treeData) {
-	let circles = plot.selectAll('circle');
+	let circles = plot.selectAll('.TreeDot');
 	let updatedCircles = circles.data(treeData, d=> d.id);
 	let enterSelection = updatedCircles.enter();
 	let newCircles = enterSelection.append('circle')
 	.attr('r', TREE_DOT_RADIUS)
 	.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
 	.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
-	.style('fill', 'blue');
+	.style('fill', 'blue')
+    .attr('class', 'TreeDot');
 	let unselectedCircles = updatedCircles.exit();
 	updatedCircles.exit().remove(); 
     
@@ -281,7 +282,7 @@ function saveSelectedPoints(){
 
 
 function drawSpeciesMenu(treeData) { 
-	menu = d3.select('#mapDiv').append('select').attr("name", "SpeciesMenu"); 
+	menu = d3.select('#dashboardContainer').append('select').attr("id", "SpeciesMenu"); 
 	names = Array.from(speciesCommonNames); 
 	names.sort(); 
 	names.unshift("All") 
@@ -289,21 +290,23 @@ function drawSpeciesMenu(treeData) {
 		menu.append('option').attr("value", name).text(name); 
 	} 
 	menu.on('change', function() { 
-		let currSelection = d3.select("select").property('value'); 
+        console.log("Menu changed");
+		let currSelection = d3.select("#SpeciesMenu").property('value'); 
 		let currData; 
 		if (currSelection === "All") { 
 			currData = treeData; 
 		} else { 
 			currData = treeData.filter(d => d.speciesNames[1] === currSelection); 
 		} 
-		let circles = plot.selectAll('circle'); 
+		let circles = plot.selectAll('.TreeDot'); 
 		let updatedCircles = circles.data(currData, d=> d.id); 
 		let enterSelection = updatedCircles.enter(); 
 		let newCircles = enterSelection.append('circle') 
 			.attr('r', TREE_DOT_RADIUS) 
 			.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];})  
 			.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];}) 
-			.style('fill', 'blue'); 
+			.style('fill', 'blue')
+            .attr('class', 'TreeDot'); 
 		let unselectedCircles = updatedCircles.exit(); 
 		updatedCircles.exit().remove();  
 	}); 
