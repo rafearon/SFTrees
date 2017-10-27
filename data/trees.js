@@ -113,7 +113,7 @@ function drawTreeMap(treeData) {
 	.attr('r', TREE_DOT_RADIUS)
 	.attr('cx', function(d) {return projection([d.lon, d.lat])[0];}) 
 	.attr('cy', function(d) {return projection([d.lon, d.lat])[1];})
-	.style('fill', 'blue')
+	.style('fill', 'green')
     .attr('class', 'TreeDot');
 	let unselectedCircles = updatedCircles.exit();
 	updatedCircles.exit().remove(); 
@@ -196,7 +196,7 @@ function clicked(evt){
 
         plot.append("circle")
             .attr("id", "pointA")
-            .attr("fill", "red")
+            .attr("fill", "blue")
             .attr('r', 3)
             .attr('cx', x) 
             .attr('cy', y);
@@ -212,7 +212,7 @@ function clicked(evt){
 
         plot.append("circle")
             .attr("id", "pointB")
-            .attr("fill", "red")
+            .attr("fill", "blue")
             .attr('r', 3)
             .attr('cx', x) 
             .attr('cy', y);
@@ -240,9 +240,9 @@ function onRadiusAChange(newRadius){
             // Need to create new circle
             plot.append("circle")
                 .attr("id", "radCircleA")
-                .attr("stroke", "green")
-                .attr("fill-opacity", 0.4)
-                .attr("fill", "green")
+                .attr("stroke", "blue")
+                .attr("fill-opacity", 0.01)
+                .attr("fill", "blue")
                 .attr('r', newRadius)
                 .attr('cx', coords[0]) 
                 .attr('cy', coords[1])
@@ -265,9 +265,9 @@ function onRadiusBChange(newRadius){
             // Need to create new circle
             plot.append("circle")
                 .attr("id", "radCircleB")
-                .attr("stroke", "green")
-                .attr("fill-opacity", 0.4)
-                .attr("fill", "green")
+                .attr("stroke", "blue")
+                .attr("fill-opacity", 0.01)
+                .attr("fill", "blue")
                 .attr('r', newRadius)
                 .attr('cx', coords[0]) 
                 .attr('cy', coords[1])
