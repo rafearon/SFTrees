@@ -21,6 +21,7 @@ var selectingPoints = false;
 var TREE_DOT_RADIUS = 2
 
 
+var currData;
 
 function isTreeInCircle(selectionCircle, tree) {
 	
@@ -89,6 +90,7 @@ function loadData(error, treeData){
     })
     drawSpeciesMenu(treeData);
     addInputCallbacks();
+    d3.select("#sf-map").attr("onclick", "clicked(evt)");
     
 }
 
@@ -105,7 +107,6 @@ function drawTreeMap(treeData) {
 	let unselectedCircles = updatedCircles.exit();
 	updatedCircles.exit().remove(); 
     
-    d3.select("#sf-map").attr("onclick", "clicked(evt)");
 }
 
 function drawDashboard(){
@@ -292,23 +293,12 @@ function drawSpeciesMenu(treeData) {
 	menu.on('change', function() { 
         console.log("Menu changed");
 		let currSelection = d3.select("#SpeciesMenu").property('value'); 
-		let currData; 
 		if (currSelection === "All") { 
 			currData = treeData; 
 		} else { 
 			currData = treeData.filter(d => d.speciesNames[1] === currSelection); 
 		} 
-		let circles = plot.selectAll('.TreeDot'); 
-		let updatedCircles = circles.data(currData, d=> d.id); 
-		let enterSelection = updatedCircles.enter(); 
-		let newCircles = enterSelection.append('circle') 
-			.attr('r', TREE_DOT_RADIUS) 
-			.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];})  
-			.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];}) 
-			.style('fill', 'blue')
-            .attr('class', 'TreeDot'); 
-		let unselectedCircles = updatedCircles.exit(); 
-		updatedCircles.exit().remove();  
+		drawTreeMap(currData)
 	}); 
  
 }
