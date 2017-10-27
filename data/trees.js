@@ -8,8 +8,8 @@ var mapHeight = 750;
 
 var mapDashboardHorzPadding = 20;
 
-var pointA = {lat:0, long:0};
-var pointB = {lat:0, long:0};
+var pointA = {lat:0, lon:0};
+var pointB = {lat:0, lon:0};
 
 // Default radius values is 20
 var radiusA = 20;
@@ -21,10 +21,20 @@ var selectingPoints = false;
 var TREE_DOT_RADIUS = 2
 
 
+var speciesFilter = 'All';
 var currData;
+var TREE_DATA_STORE;
 
-function isTreeInCircle(selectionCircle, tree) {
-	
+
+
+function isTreeInCircle(selectionCircle, radius, d) {
+	circle = projection([selectionCircle.lon, selectionCircle.lat]);
+	tree = projection([d.lon, d.lat]);
+	distance = Math.sqrt(Math.pow(circle[0] - tree[0], 2) + Math.pow(circle[1] - tree[1], 2));
+	if (distance > radius) {
+		return false
+	}
+	return true
 }
 
 
@@ -77,6 +87,7 @@ d3.csv('trees.csv', parseInputRow, loadData);
 //console.log(projection("37.72954822",	"-122.3926894"))
 function loadData(error, treeData){
 	if(error) throw error;
+	TREE_DATA_STORE = treeData;
 	drawTreeMap(treeData);
     console.log(treeData);
     
@@ -100,13 +111,12 @@ function drawTreeMap(treeData) {
 	let enterSelection = updatedCircles.enter();
 	let newCircles = enterSelection.append('circle')
 	.attr('r', TREE_DOT_RADIUS)
-	.attr('cx', function(d) {return projection([d.longitude, d.latitude])[0];}) 
-	.attr('cy', function(d) {return projection([d.longitude, d.latitude])[1];})
+	.attr('cx', function(d) {return projection([d.lon, d.lat])[0];}) 
+	.attr('cy', function(d) {return projection([d.lon, d.lat])[1];})
 	.style('fill', 'blue')
     .attr('class', 'TreeDot');
 	let unselectedCircles = updatedCircles.exit();
 	updatedCircles.exit().remove(); 
-    
 }
 
 function drawDashboard(){
@@ -152,12 +162,12 @@ function parseInputRow (d) {
           address: d.qAddress,
           diameterBH: d.DBH,
           plotSize: d.PlotSize,
-	      latitude: +d.Latitude,
-          longitude: +d.Longitude,
+	      lat: +d.Latitude,
+          lon: +d.Longitude,
           geoCoord: [+d.Latitude, +d.Longitude],
           speciesNames: sn 
         };
-      };
+      }
 
 function addInputCallbacks(){
     /*
@@ -239,6 +249,7 @@ function onRadiusAChange(newRadius){
         } else{
             selectedRadi.attr('r', newRadius);
         }
+     filterChange(TREE_DATA_STORE);
     }
 }
 
@@ -263,6 +274,7 @@ function onRadiusBChange(newRadius){
         } else{
             selectedRadi.attr('r', newRadius);
         }
+    filterChange(TREE_DATA_STORE);
     }
 }
 
@@ -273,6 +285,7 @@ function resetSelectedPoints(){
     d3.selectAll('#pointB').remove();
     d3.select('#radCircleA').remove();
     d3.select('#radCircleB').remove();
+    filterChange(TREE_DATA_STORE);
 }
 
 function saveSelectedPoints(){
@@ -293,15 +306,34 @@ function drawSpeciesMenu(treeData) {
 	menu.on('change', function() { 
         console.log("Menu changed");
 		let currSelection = d3.select("#SpeciesMenu").property('value'); 
-		if (currSelection === "All") { 
-			currData = treeData; 
-		} else { 
-			currData = treeData.filter(d => d.speciesNames[1] === currSelection); 
-		} 
-		drawTreeMap(currData)
+		speciesFilter = currSelection;
+		filterChange(treeData);
 	}); 
  
 }
+
+
+
+function csvFilter(d) {
+	pointAMissing = pointA.lat == 0 && pointA.lon == 0;
+	pointBMissing = pointB.lat == 0 && pointB.lon == 0;
+	noCircle = pointAMissing || pointBMissing;
+	isInCircle = noCircle || isTreeInCircle(pointA, radiusA, d) && isTreeInCircle(pointB, radiusB, d);
+	name = d.speciesNames[1];
+	isCorrectSpecies = false;
+	if (name === speciesFilter || speciesFilter === "All") {
+		isCorrectSpecies = true;
+	}
+	return isCorrectSpecies && isInCircle
+}
+
+
+
+function filterChange(treeData) {
+	currData = treeData.filter(csvFilter);
+	drawTreeMap(currData);
+}
+
 
 
 //Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3 
