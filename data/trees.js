@@ -196,6 +196,13 @@ function addInputCallbacks(){
         });
 }
 
+
+function onSpeciesMenuInputChange(){
+        var input, filter, ul, li, a, i;
+    input = document.getElementById("searchInput");
+    filterSpeciesMenu(input.value);
+}
+
 /* Filters tree names that appear in the dropdown based on what
     is searched 
     StackOverflow Help to make list scrollable:
@@ -206,10 +213,10 @@ function addInputCallbacks(){
     StackOverflow Help to add/remove list items:
         https://stackoverflow.com/questions/36884886/how-to-add-an-list-item-to-an-existing-list-of-items-in-d3
     */
-function filterSpeciesMenu(){
-    var input, filter, ul, li, a, i;
-    input = document.getElementById("searchInput");
-    filter = input.value.toUpperCase();
+function filterSpeciesMenu(inputText){
+    console.log("filterSpeciesMenu");
+
+    var filter = inputText.toUpperCase();
     
     /* this is ALL tree names, but treeNameDataDisplayed is 
                 what's currently displayed*/
@@ -240,7 +247,8 @@ function displayAllTreeNames(){
     treeList.enter()
         .append('li')
         .attr('class', 'treeNameItem')
-        .text(function(d){return d});
+        .text(function(d){return d})
+        .on("click", treeNameClicked);
 }
 
 function updateSpeciesMenu(newTreeNameData){
@@ -252,14 +260,20 @@ function updateSpeciesMenu(newTreeNameData){
     treeList.enter()
         .append('li')
         .attr('class', 'treeNameItem')
-        .append('a')
-        .text(function(d){return d});
+        .text(function(d){return d})
+        .on("click", treeNameClicked);
     
     // update
     treeList.text(function(d){return d});
     
     // exit
     treeList.exit().remove();
+}
+
+function treeNameClicked(treeName){
+    console.log(treeName);
+    document.getElementById("searchInput").value = treeName;
+    filterSpeciesMenu(treeName);
 }
 
 
