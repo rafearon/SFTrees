@@ -1,32 +1,55 @@
 <!doctype html>
-
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Trees in San Francisco</title>
-  <link rel="stylesheet" href="styles/styles.css?v=1.0">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-</head>
+   <head>
+      <meta charset="utf-8">
+      <title>Trees in San Francisco</title>
+      <link rel="stylesheet" href="styles/styles.css?v=1.0">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   </head>
+   <body>
+      <script src="data/d3.v4.min.js"></script>
+      <script src="scripts/intro.js"></script>
 
-<body>
-  <script src="data/d3.v4.min.js"></script>
+<!-- Modal -->
+<div id="myModal" class="modal show" role="dialog">
+  <div class="modal-dialog">
 
-    <div class="row">
-        <div class="col-md-9" id="mapDiv"></div>
-        <div class="col-md-3" id="dashboardContainer">
-            <div>
-                <span>Point A Radius: </span>
-                <input id="aRadius" type="range" min="1" max="600" value="100">
-            </div>
-            <div>
-                <span>Point B Radius: </span>
-                <input id="bRadius" type="range" min="1" max="600" value="100">
-            </div>
-        </div>
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" onclick="close_modal()">&times;</button>
+        <h4 class="modal-title">Trees in San Francisco</h4>
+      </div>
+      <div class="modal-body">
+        <p>This tool helps you explore where trees are located in San Francisco by species and proximity to two points. To start, click on the map to drop a point of interest. When you have two points on the map, you can use the radius sliders to increase or decrease the selection circles.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" href='#myModal' onclick="close_modal()">Close</button>
+      </div>
     </div>
-    
-  <script src="data/trees.js"></script>
-    </body>
+
+  </div>
+</div>
+
+
+
+
+      <div class="row">
+         <div class="col-md-9" id="mapDiv">
+         </div>
+         <div class="col-md-3" id="dashboardContainer">
+            <div>
+               <span>Point A Radius: </span>
+               <input id="aRadius" type="range" min="1" max="600" value="100">
+            </div>
+            <div>
+               <span>Point B Radius: </span>
+               <input id="bRadius" type="range" min="1" max="600" value="100">
+            </div>
+         </div>
+      </div>
+      <script src="data/trees.js"></script>
+   </body>
 </html>
