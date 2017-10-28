@@ -21,6 +21,8 @@ var speciesCommonNames = new Set();
 var selectingPoints = false; 
 
 var TREE_DOT_RADIUS = 2;
+var SELECT_BTN_TEXT_ON = "Selecting Points of Interest";
+var SELECT_BTN_TEXT_OFF = "Select Points of Interest";
 
 var speciesFilter = 'All';
 var currData;
@@ -104,7 +106,8 @@ function loadData(error, treeData){
     
     d3.selectAll('#selectBtn').on("click", function(d){
         // Button clicked to change select points
-        d3.select('#selectBtn').attr("fill", "orange");
+        d3.select('#selectBtnRect').attr("fill", "orange");
+        d3.select("#selectBtn").text(SELECT_BTN_TEXT_ON);
         resetSelectedPoints();
     })
     //drawSpeciesMenu(treeData);
@@ -144,15 +147,23 @@ function drawDashboard(){
 
 function drawSelectPointsBtn(elems){
     var buttonHeight = 25;
+    var selectButtonSvg = d3.select('#selectButtonDiv').append('svg')
+                .attr('width', 200)
+              .attr('height', 100);
+    
+    var elems = selectButtonSvg.selectAll('g')
+        .data(dashboardData)
+        .enter()
+        .append('g');
 
     elems.append('rect')
-        .attr('id', 'selectBtn')
-        .attr('width', 120)
+        .attr('id', 'selectBtnRect')
+        .attr('width', 190)
         .attr('height', buttonHeight)
         .attr('fill', 'orange');
         
     return elems.append('text')
-        .text("Select Points")
+        .text(SELECT_BTN_TEXT_ON)
         .attr('id', 'selectBtn')
         .attr('x', 10)
         .attr('y', buttonHeight/2+5)
@@ -238,7 +249,7 @@ function filterSpeciesMenu(inputText){
     filterChange(TREE_DATA_STORE);
 }
 
-
+/* Displays all the tree names in the menu */
 function displayAllTreeNames(){
     var treeList = d3.select("#treeNameList")
         .selectAll('li')
@@ -251,6 +262,7 @@ function displayAllTreeNames(){
         .on("click", treeNameClicked);
 }
 
+/* Updates treeName data */
 function updateSpeciesMenu(newTreeNameData){
     var treeList = d3.select("#treeNameList")
         .selectAll('li')
@@ -270,6 +282,7 @@ function updateSpeciesMenu(newTreeNameData){
     treeList.exit().remove();
 }
 
+/* Called when a treeName list item is clicked */
 function treeNameClicked(treeName){
     console.log(treeName);
     document.getElementById("searchInput").value = treeName;
@@ -402,7 +415,8 @@ function resetSelectedPoints(){
 }
 
 function saveSelectedPoints(){
-    d3.select('#selectBtn').attr("fill", "steelblue");
+    d3.select('#selectBtn').text(SELECT_BTN_TEXT_OFF);
+    d3.select('#selectBtnRect').attr("fill", "steelblue");
     onRadiusAChange(document.getElementById('aRadius').value);
     onRadiusBChange(document.getElementById('bRadius').value);
 }
@@ -429,7 +443,6 @@ function filterChange(treeData) {
 	currData = treeData.filter(csvFilter);
 	drawTreeMap(currData);
 }
-
 
 
 //Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3 
