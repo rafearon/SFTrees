@@ -1,9 +1,12 @@
 
+body {
+    overflow: hidden;
+}
+
 /*
     StackOverflow post that explained how to layer a div element over another:
     https://stackoverflow.com/questions/2941189/how-to-overlay-one-div-over-another-div
 */
-
 #leftContainer {
  position: relative;
 }
@@ -47,8 +50,33 @@
 #treeNameList li:hover:not(.header) {
   background-color: #eee;
 }
-nav ul{height:200px; width:100%;}
-nav ul{overflow:hidden; overflow-y:scroll;}
+
+#aRadius, #bRadius {
+    margin-top: 10px;
+}
+
+.dragSelectorDiv {
+    margin: 5%;
+}
+
+.normText {
+      font-size: 18px;
+  color: black;
+}
+
+.pageTitle {
+    margin-bottom: 5%;
+}
+
+nav ul{
+    /*Defines how tall the list should be*/
+    height:400px; 
+    width:100%;
+}
+nav ul{
+    overflow:hidden; 
+    overflow-y:scroll;
+}
 
 #searchInput {
 /*  background-image: url('/css/searchicon.png');

@@ -104,7 +104,7 @@ function loadData(error, treeData){
     // Draw dashboard controls
     var selectPointsBtn = drawSelectPointsBtn(drawDashboard());
     
-    d3.selectAll('#selectBtn').on("click", function(d){
+    d3.selectAll('#selectBtnGroup').on("click", function(d){
         // Button clicked to change select points
         d3.select('#selectBtnRect').attr("fill", "orange");
         d3.select("#selectBtn").text(SELECT_BTN_TEXT_ON);
@@ -146,25 +146,27 @@ function drawDashboard(){
 }
 
 function drawSelectPointsBtn(elems){
-    var buttonHeight = 25;
+    var buttonHeight = 40;
     var selectButtonSvg = d3.select('#selectButtonDiv').append('svg')
-                .attr('width', 200)
+                .attr('width', 300)
               .attr('height', 100);
     
     var elems = selectButtonSvg.selectAll('g')
         .data(dashboardData)
         .enter()
-        .append('g');
+        .append('g')
+        .attr('id', 'selectBtnGroup');
 
     elems.append('rect')
         .attr('id', 'selectBtnRect')
-        .attr('width', 190)
+        .attr('width', 250)
         .attr('height', buttonHeight)
         .attr('fill', 'orange');
         
     return elems.append('text')
         .text(SELECT_BTN_TEXT_ON)
         .attr('id', 'selectBtn')
+        .attr("class", "normText")
         .attr('x', 10)
         .attr('y', buttonHeight/2+5)
         .attr('width', 100)
