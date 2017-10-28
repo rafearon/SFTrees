@@ -264,7 +264,7 @@ function updateRadiusText(radius, pointID, startText) {
 	 console.log("triggered");
 	 label = document.getElementById(pointID);
      origin = [0,0];
-     edge = [radiusB, 0];
+     edge = [radius, 0];
 
      oCoord = projection.invert(origin);
      eCoord = projection.invert(edge);
