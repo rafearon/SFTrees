@@ -269,7 +269,6 @@ function updateRadiusText(radius, pointID, startText) {
      oCoord = projection.invert(origin);
      eCoord = projection.invert(edge);
      distanceInKM = getDistanceFromLatLonInKm(oCoord[0], oCoord[1], eCoord[0], eCoord[1]);
-     console.log(distanceInKM);
 
      label.innerText = startText + distanceInKM.toFixed(2) + " KM";
 }
