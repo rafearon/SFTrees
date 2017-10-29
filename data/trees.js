@@ -18,9 +18,10 @@ var radiusB = 20;
 
 /* Set that contains all common names for all tree types in data set*/
 var speciesCommonNames = new Set();
+var treeNameData;
 var selectingPoints = false; 
 
-var TREE_DOT_RADIUS = 2;
+var TREE_DOT_RADIUS = 3;
 var SELECT_BTN_TEXT_ON = "Selecting Points of Interest";
 var SELECT_BTN_TEXT_OFF = "Select Points of Interest";
 
@@ -32,6 +33,8 @@ var treeNameDataDisplayed;
 /* set of tree names displayed */
 var commonNamesDisplayedSet;
 
+var nextFilterUpdate = null;
+var currInputText = "";
 
 
 var aText = "Point A Radius: "
@@ -114,7 +117,8 @@ function loadData(error, treeData){
     addInputCallbacks();
     d3.select("#sf-map").attr("onclick", "clicked(evt)");
     treeNameDataDisplayed = Array.from(speciesCommonNames).sort();
-    commonNamesDisplayedSet = new Set(treeNameDataDisplayed);
+    treeNameData = Array.from(speciesCommonNames).sort();
+    //commonNamesDisplayedSet = new Set(treeNameDataDisplayed);
     displayAllTreeNames();
 }
 
@@ -228,12 +232,11 @@ function onSpeciesMenuInputChange(){
     */
 function filterSpeciesMenu(inputText){
     console.log("filterSpeciesMenu");
-
+    currInputText = inputText;
     var filter = inputText.toUpperCase();
     
     /* this is ALL tree names, but treeNameDataDisplayed is 
                 what's currently displayed*/
-    var treeNameData = Array.from(speciesCommonNames);
     
     // we want to edit treeNameDisplayed and filter it to have just names
     // we want, then have d3 append and remove elems based on that.
@@ -245,7 +248,6 @@ function filterSpeciesMenu(inputText){
     
     /* Checks if the name is in the list of tree names displayed */
     commonNamesDisplayedSet = new Set(treeNameDataDisplayed);
-    
     updateSpeciesMenu(treeNameDataDisplayed);
     /* update ui with new tree name data */
     filterChange(TREE_DATA_STORE);
@@ -301,12 +303,13 @@ function clicked(evt){
         var x = evt.clientX - dim.left;
         var y = evt.clientY - dim.top;
 
-        plot.append("circle")
+        plot.append("rect")
             .attr("id", "pointA")
-            .attr("fill", "blue")
-            .attr('r', 3)
-            .attr('cx', x) 
-            .attr('cy', y);
+            .attr("fill", "red")
+            .attr('width', 9)
+            .attr('height', 9)
+            .attr('x', x) 
+            .attr('y', y);
         var coords = projection.invert([x, y]);
         pointA.lat = coords[1];
         pointA.lon = coords[0];
@@ -317,12 +320,13 @@ function clicked(evt){
         var x = evt.clientX - dim.left;
         var y = evt.clientY - dim.top;
 
-        plot.append("circle")
+        plot.append("rect")
             .attr("id", "pointB")
             .attr("fill", "blue")
-            .attr('r', 3)
-            .attr('cx', x) 
-            .attr('cy', y);
+            .attr('width', 9)
+            .attr("height", 9)
+            .attr('x', x) 
+            .attr('y', y);
         
         var coords = projection.invert([x, y]);
         pointB.lat = coords[1];
@@ -349,7 +353,7 @@ function onRadiusAChange(newRadius){
             // Need to create new circle
             plot.append("circle")
                 .attr("id", "radCircleA")
-                .attr("stroke", "blue")
+                .attr("stroke", "red")
                 .attr("fill-opacity", 0.01)
                 .attr("fill", "blue")
                 .attr('r', newRadius)
@@ -432,7 +436,8 @@ function csvFilter(d) {
 	
     name = d.speciesNames[1];
     isCorrectSpecies = false;
-	if (commonNamesDisplayedSet.has(name)) {
+    //if (commonNamesDisplayedSet.has(name) {
+	if (name.indexOf(currInputText) !== -1) {
 		isCorrectSpecies = true;
 	}
 	return isCorrectSpecies && isInCircle;
@@ -441,10 +446,22 @@ function csvFilter(d) {
 
 
 function filterChange(treeData) {
-	currData = treeData.filter(csvFilter);
-	drawTreeMap(currData);
+   
+         currData = treeData.filter(csvFilter);
+         drawTreeMap(currData);
 }
 
+/*
+function filterChange(treeData) {
+    if (nextFilterUpdate != null) {
+        clearTimeout(nextFilterUpdate);
+    }
+    nextFilterUpdate = setTimeout(function(){ 
+         currData = treeData.filter(csvFilter);
+         drawTreeMap(currData);
+        }, 1);
+}
+*/
 
 //Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3 
 // https://stackoverflow.com/questions/24193593/d3-how-to-change-dataset-based-on-drop-down-box-selection 
