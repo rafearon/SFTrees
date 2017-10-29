@@ -8,6 +8,7 @@ var mapHeight = 750;
 
 var mapDashboardHorzPadding = 20;
 
+/* Keeps track of user-selected centers for radius circles */
 var pointA = {lat:0, lon:0};
 var pointB = {lat:0, lon:0};
 
@@ -15,20 +16,26 @@ var pointB = {lat:0, lon:0};
 var radiusA = 20;
 var radiusB = 20;
 
+/* Set that contains all common names for all tree types in data set*/
 var speciesCommonNames = new Set();
 var selectingPoints = false; 
 
-var TREE_DOT_RADIUS = 2
-
+var TREE_DOT_RADIUS = 2;
+var SELECT_BTN_TEXT_ON = "Selecting Points of Interest";
+var SELECT_BTN_TEXT_OFF = "Select Points of Interest";
 
 var speciesFilter = 'All';
 var currData;
 var TREE_DATA_STORE;
+/* array of tree names displayed */
+var treeNameDataDisplayed;
+/* set of tree names displayed */
+var commonNamesDisplayedSet;
+
 
 
 var aText = "Point A Radius: "
 var bText = "Point B Radius: "
-
 
 function isTreeInCircle(selectionCircle, radius, d) {
 	circle = projection([selectionCircle.lon, selectionCircle.lat]);
@@ -91,22 +98,26 @@ d3.csv('trees.csv', parseInputRow, loadData);
 function loadData(error, treeData){
 	if(error) throw error;
 	TREE_DATA_STORE = treeData;
-	drawTreeMap(treeData);
-    console.log(treeData);
+	drawTreeMap(TREE_DATA_STORE);
+    console.log(TREE_DATA_STORE);
     
     // Draw dashboard controls
     var selectPointsBtn = drawSelectPointsBtn(drawDashboard());
     
-    d3.selectAll('#selectBtn').on("click", function(d){
+    d3.selectAll('#selectBtnGroup').on("click", function(d){
         // Button clicked to change select points
-        d3.select('#selectBtn').attr("fill", "orange");
+        d3.select('#selectBtnRect').attr("fill", "orange");
+        d3.select("#selectBtn").text(SELECT_BTN_TEXT_ON);
         resetSelectedPoints();
     })
-    drawSpeciesMenu(treeData);
+    //drawSpeciesMenu(treeData);
     addInputCallbacks();
     d3.select("#sf-map").attr("onclick", "clicked(evt)");
-    
+    treeNameDataDisplayed = Array.from(speciesCommonNames).sort();
+    commonNamesDisplayedSet = new Set(treeNameDataDisplayed);
+    displayAllTreeNames();
 }
+
 
 function drawTreeMap(treeData) {
 	let circles = plot.selectAll('.TreeDot');
@@ -135,17 +146,27 @@ function drawDashboard(){
 }
 
 function drawSelectPointsBtn(elems){
-    var buttonHeight = 25;
+    var buttonHeight = 40;
+    var selectButtonSvg = d3.select('#selectButtonDiv').append('svg')
+                .attr('width', 300)
+              .attr('height', 100);
+    
+    var elems = selectButtonSvg.selectAll('g')
+        .data(dashboardData)
+        .enter()
+        .append('g')
+        .attr('id', 'selectBtnGroup');
 
     elems.append('rect')
-        .attr('id', 'selectBtn')
-        .attr('width', 120)
+        .attr('id', 'selectBtnRect')
+        .attr('width', 250)
         .attr('height', buttonHeight)
         .attr('fill', 'orange');
         
     return elems.append('text')
-        .text("Select Points")
+        .text(SELECT_BTN_TEXT_ON)
         .attr('id', 'selectBtn')
+        .attr("class", "normText")
         .attr('x', 10)
         .attr('y', buttonHeight/2+5)
         .attr('width', 100)
@@ -157,7 +178,7 @@ function drawSelectPointsBtn(elems){
 function parseInputRow (d) {
         //console.log(d)
         sn = parseSpeciesLabel(d.qSpecies); 
-        speciesCommonNames.add(sn[1]); 
+        speciesCommonNames.add(sn[1].trim()); 
         return {
           id: +d.TreeID,
           species: d.qSpecies,
@@ -187,6 +208,89 @@ function addInputCallbacks(){
             onRadiusBChange(this.value);
         });
 }
+
+
+function onSpeciesMenuInputChange(){
+        var input, filter, ul, li, a, i;
+    input = document.getElementById("searchInput");
+    filterSpeciesMenu(input.value);
+}
+
+/* Filters tree names that appear in the dropdown based on what
+    is searched 
+    StackOverflow Help to make list scrollable:
+        https://stackoverflow.com/questions/21998679/css-how-to-make-scrollable-list
+    W-3 Tutorial on Filtering list:
+        https://www.w3schools.com/howto/howto_js_filter_lists.asp
+        
+    StackOverflow Help to add/remove list items:
+        https://stackoverflow.com/questions/36884886/how-to-add-an-list-item-to-an-existing-list-of-items-in-d3
+    */
+function filterSpeciesMenu(inputText){
+    console.log("filterSpeciesMenu");
+
+    var filter = inputText.toUpperCase();
+    
+    /* this is ALL tree names, but treeNameDataDisplayed is 
+                what's currently displayed*/
+    var treeNameData = Array.from(speciesCommonNames);
+    
+    // we want to edit treeNameDisplayed and filter it to have just names
+    // we want, then have d3 append and remove elems based on that.
+    
+    treeNameDataDisplayed = treeNameData.filter(function(treeName){
+        /* only returns names that have the input's value as substring */
+       return treeName.toUpperCase().indexOf(filter) > -1; 
+    });
+    
+    /* Checks if the name is in the list of tree names displayed */
+    commonNamesDisplayedSet = new Set(treeNameDataDisplayed);
+    
+    updateSpeciesMenu(treeNameDataDisplayed);
+    /* update ui with new tree name data */
+    filterChange(TREE_DATA_STORE);
+}
+
+/* Displays all the tree names in the menu */
+function displayAllTreeNames(){
+    var treeList = d3.select("#treeNameList")
+        .selectAll('li')
+        .data(treeNameDataDisplayed);
+        // enter
+    treeList.enter()
+        .append('li')
+        .attr('class', 'treeNameItem')
+        .text(function(d){return d})
+        .on("click", treeNameClicked);
+}
+
+/* Updates treeName data */
+function updateSpeciesMenu(newTreeNameData){
+    var treeList = d3.select("#treeNameList")
+        .selectAll('li')
+        .data(newTreeNameData);
+    
+    // enter
+    treeList.enter()
+        .append('li')
+        .attr('class', 'treeNameItem')
+        .text(function(d){return d})
+        .on("click", treeNameClicked);
+    
+    // update
+    treeList.text(function(d){return d});
+    
+    // exit
+    treeList.exit().remove();
+}
+
+/* Called when a treeName list item is clicked */
+function treeNameClicked(treeName){
+    console.log(treeName);
+    document.getElementById("searchInput").value = treeName;
+    filterSpeciesMenu(treeName);
+}
+
 
 /* Finding coordinates where clicked, helped by StackOverflow 
 https://stackoverflow.com/questions/29261304/how-to-get-the-click-coordinates-relative-to-svg-element-holding-the-onclick-lis*/
@@ -312,42 +416,26 @@ function resetSelectedPoints(){
 }
 
 function saveSelectedPoints(){
-    d3.select('#selectBtn').attr("fill", "steelblue");
+    d3.select('#selectBtn').text(SELECT_BTN_TEXT_OFF);
+    d3.select('#selectBtnRect').attr("fill", "steelblue");
     onRadiusAChange(document.getElementById('aRadius').value);
     onRadiusBChange(document.getElementById('bRadius').value);
 }
 
 
-function drawSpeciesMenu(treeData) { 
-	menu = d3.select('#dashboardContainer').append('select').attr("id", "SpeciesMenu"); 
-	names = Array.from(speciesCommonNames); 
-	names.sort(); 
-	names.unshift("All") 
-	for (name of names) { 
-		menu.append('option').attr("value", name).text(name); 
-	} 
-	menu.on('change', function() { 
-        console.log("Menu changed");
-		let currSelection = d3.select("#SpeciesMenu").property('value'); 
-		speciesFilter = currSelection;
-		filterChange(treeData);
-	}); 
- 
-}
-
-
-
 function csvFilter(d) {
 	pointAMissing = pointA.lat == 0 && pointA.lon == 0;
 	pointBMissing = pointB.lat == 0 && pointB.lon == 0;
+    
 	noCircle = pointAMissing || pointBMissing;
 	isInCircle = noCircle || isTreeInCircle(pointA, radiusA, d) && isTreeInCircle(pointB, radiusB, d);
-	name = d.speciesNames[1];
-	isCorrectSpecies = false;
-	if (name === speciesFilter || speciesFilter === "All") {
+	
+    name = d.speciesNames[1];
+    isCorrectSpecies = false;
+	if (commonNamesDisplayedSet.has(name)) {
 		isCorrectSpecies = true;
 	}
-	return isCorrectSpecies && isInCircle
+	return isCorrectSpecies && isInCircle;
 }
 
 
@@ -358,13 +446,12 @@ function filterChange(treeData) {
 }
 
 
-
 //Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3 
 // https://stackoverflow.com/questions/24193593/d3-how-to-change-dataset-based-on-drop-down-box-selection 
  function parseSpeciesLabel(name) { 
 	var splitNames = name.split("::"); 
 	latinName = splitNames[0]; 
-	commonName = splitNames[1]; 
+	commonName = splitNames[1].trim(); 
 	//console.log(splitNames); 
 	if (latinName === "") { 
 		latinName = "Unknown"; 

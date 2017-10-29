@@ -1,3 +1,95 @@
+
+body {
+    overflow: hidden;
+}
+
+/*
+    StackOverflow post that explained how to layer a div element over another:
+    https://stackoverflow.com/questions/2941189/how-to-overlay-one-div-over-another-div
+*/
+#leftContainer {
+ position: relative;
+}
+
+#mapDiv {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#selectButtonDiv {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 200;
+  left: 200;
+    margin-left: 50px;
+    margin-top: 50px;
+  z-index: 10;
+}
+
+#treeNameList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#treeNameList li {
+  border: 1px solid #ddd;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: #f6f6f6;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  color: black;
+  display: block
+}
+
+#treeNameList li:hover:not(.header) {
+  background-color: #eee;
+}
+
+#aRadius, #bRadius {
+    margin-top: 10px;
+}
+
+.dragSelectorDiv {
+    margin: 5%;
+}
+
+.normText {
+      font-size: 18px;
+  color: black;
+}
+
+.pageTitle {
+    margin-bottom: 5%;
+}
+
+nav ul{
+    /*Defines how tall the list should be*/
+    height:400px; 
+    width:100%;
+}
+nav ul{
+    overflow:hidden; 
+    overflow-y:scroll;
+}
+
+#searchInput {
+  background-image: url('search_icon.png');
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+    
+}
+
 /* The Overlay (background) */
 .overlay {
     /* Height & width depends on how you want to reveal the overlay (see JS below) */    
