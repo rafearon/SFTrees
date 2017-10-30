@@ -463,8 +463,6 @@ function filterChange(treeData) {
 }
 */
 
-//Notes for dropdown menu https://stackoverflow.com/questions/25207732/finding-the-user-selected-options-from-a-multiple-drop-down-menu-using-d3 
-// https://stackoverflow.com/questions/24193593/d3-how-to-change-dataset-based-on-drop-down-box-selection 
  function parseSpeciesLabel(name) { 
 	var splitNames = name.split("::"); 
 	latinName = splitNames[0]; 
