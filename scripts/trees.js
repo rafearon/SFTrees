@@ -437,7 +437,7 @@ function csvFilter(d) {
     name = d.speciesNames[1];
     isCorrectSpecies = false;
     //if (commonNamesDisplayedSet.has(name) {
-	if (name.indexOf(currInputText) !== -1) {
+	if (name.toLowerCase().indexOf(currInputText.toLowerCase()) !== -1) {
 		isCorrectSpecies = true;
 	}
 	return isCorrectSpecies && isInCircle;
